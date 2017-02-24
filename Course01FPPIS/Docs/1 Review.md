@@ -77,3 +77,31 @@ A2的argument可以传递到A1，因为A2 <: A1; B1的方法一定能在B2实现
 
 
 **map flatMap filter foldLeft foldRight implementation**
+
+	abstract class List[T] {
+		def map[U](f: T => U): List[U] = this match {
+			case Nil => this
+			case x :: xs => f(x) :: xs.map(f)
+		}
+		
+		def filter(p: T => Boolean): List[T] = this match {
+			case Nil => this
+			case x :: xs => if (p(x)) x :: xs.filter(p) else xs.filter(p)
+		}
+		
+		def foldLeft[U](z: U)(op: (U, T) => U): U = this match {
+			case Nil => z
+			case x :: xs => (xs foldLeft op(z, x))(op)
+		}
+		def foldRight[U](z: U)(op: (T, U) => U): U = this match {
+			case Nil => z
+			case x :: xs => op(x, (xs foldRight z)(op))
+		}
+	}
+	
+**Difference between foldLeft and foldRight**
+
+	def concat[T](xs: List[T], ys: List[T]): List[T] = 
+	(xs foldRight ys)(_ :: _)
+	
+but if we used foldLeft, the tail in one elem (U, T) => U is T, the type of T is not a List, and :: is not applicable
